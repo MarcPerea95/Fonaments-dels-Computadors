@@ -1,6 +1,11 @@
 #define PIN_LED 2
 #define BUTTON 12
+#define BAUD_RATE 9600
+
+enum States {STANDBY, WAIT, ON, OFF, EXIT};
+
 bool activate = false;
+bool ledOn = false;
 int prevState = LOW;
 int currState = LOW;
 
@@ -8,55 +13,92 @@ int execTime = 0;
 
 class Timer
 {
-  public:
+  private:
     int currentTime;
-    Timer(){currentTime = 0;}
+  public:
+    Timer() {
+      currentTime = millis();
+    }
     bool Ready(int t)
     {
-      if(millis()-currentTime >= t)
+      if (millis() - currentTime >= t)
       {
         currentTime = millis();
         return true;
       }
-
-      return false;
-      
-      
+      else {
+        return false;
+      }
     }
 };
-Timer t1;
-Timer t2;
-Timer t3;
+Timer timer;
+States state;
 
 // the setup function runs once when you press reset or power the board
 void setup() {
   // initialize digital pin 2 as an output.
   pinMode(PIN_LED, OUTPUT);
   pinMode(BUTTON, INPUT);
-
+  timer = Timer();
+  state = WAIT;
 }
 
 // the loop function runs over and over again forever
 void loop() {
   currState = digitalRead(BUTTON);
 
-  if (currState == HIGH && currState != prevState) {
+  if (currState == LOW && currState != prevState) {
     activate = !activate;
+    ledOn = true;
+    digitalWrite(PIN_LED, LOW);
+    //timer = Timer();
   }
-
   prevState = currState;
 
+  switch (state) {
+    case STANDBY:
+      if (activate)state = WAIT;
+      break;
+    case WAIT:
+      if (!activate)
+      {
+        state = EXIT;
+        break;
+      }
+      if (timer.Ready(1000))
+      {
+        if (!ledOn)state = ON;
+        else state = OFF;
+      }
+      break;
+    case ON:
+      if (!activate)
+      {
+        state = EXIT;
+        break;
+      }
+      digitalWrite(PIN_LED, HIGH);
+      ledOn = true;
+      state = WAIT;
+      break;
+    case OFF:
+      if (!activate)
+      {
+        state = EXIT;
+        break;
+      }
+      digitalWrite(PIN_LED, LOW);
+      ledOn = false;
+      state = WAIT;
+      break;
+    case EXIT:
+      digitalWrite(PIN_LED, LOW);
+      ledOn = false;
+      timer = Timer();
+      state = STANDBY;
+      break;
+  }
 
-  if (activate) {
-    //int timer
-    if(t1.Ready(100))
-    digitalWrite(PIN_LED, HIGH);     // turn the LED on (HIGH is the voltage level)
-    //millis(1000);
-    if(t2.Ready(200))// wait for a second
-    digitalWrite(PIN_LED, LOW);      // turn the LED off by making the voltage LOW
-    //millis(1000);                    // wait for a second
-
-  } else {}
 }
 
 
