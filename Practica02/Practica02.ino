@@ -1,3 +1,5 @@
+#define SERIAL_TAG_ON '1'
+#define SERIAL_TAG_OFF '0'
 #define PIN_LED 2
 #define BUTTON 12
 #define BAUD_RATE 9600
@@ -36,15 +38,24 @@ States state;
 
 // the setup function runs once when you press reset or power the board
 void setup() {
+  Serial.begin(BAUD_RATE);
   // initialize digital pin 2 as an output.
   pinMode(PIN_LED, OUTPUT);
   pinMode(BUTTON, INPUT);
   timer = Timer();
   state = WAIT;
+  Serial.println("Enter: '1' for System ON | '0' for System OFF");
 }
 
 // the loop function runs over and over again forever
 void loop() {
+  int buff;
+  if (Serial.available() > 0)
+  {
+    buff = Serial.read();
+    if(buff == SERIAL_TAG_OFF)activate = false;
+    else if(buff == SERIAL_TAG_ON)activate = true;
+  }
   currState = digitalRead(BUTTON);
 
   if (currState == LOW && currState != prevState) {
