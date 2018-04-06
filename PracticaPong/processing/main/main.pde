@@ -27,15 +27,15 @@ public class InputManager {
   {
 
     if ( dataAvailable (CHANNEL_1) ) {      
-      println (getData(CHANNEL_1)+" ");
+      println ("Llum: "+getData(CHANNEL_1)+" ");
       lightValue = getData(CHANNEL_1);
     }
     if ( dataAvailable (CHANNEL_2) ) {      
-      println (getData(CHANNEL_2)+" ");
+      println ("Potenciometre: "+getData(CHANNEL_2)+" ");
       rotatorValue = getData(CHANNEL_2);
     }
     if ( dataAvailable (CHANNEL_3) ) {      
-      println (getData(CHANNEL_3)+" ");
+      println ("Temperatura: "+getData(CHANNEL_3)+" ");
       temperatureValue = getData(CHANNEL_3);
     }
   }
@@ -45,13 +45,13 @@ public class InputManager {
   }
 
   public float GetTemperatureValue() {
-    return 1;
+    return temperatureValue;
   }
   public float GetRotatorValue() {
-    return 0.1;
+    return rotatorValue;
   }
   public float GetLightValue() {
-    return 0.8;
+    return lightValue;
   }
 }
 
