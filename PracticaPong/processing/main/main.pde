@@ -19,14 +19,16 @@ class vector {
 }
 
 public class InputManager {
-
+  boolean firstTime;
   int lightValue, rotatorValue, temperatureValue;
+  int startTemperatureValue;
 
   InputManager() {
   }
 
   public void Setup() {
     commSetup();
+    firstTime = true;
   }
 
   public void Update()
@@ -34,14 +36,25 @@ public class InputManager {
 
     if ( dataAvailable (CHANNEL_1) ) {      
       lightValue = getData(CHANNEL_1);
-      println (lightValue);
+      //println ("Llum: "+lightValue);
     }
     if ( dataAvailable (CHANNEL_2) ) {      
       rotatorValue = getData(CHANNEL_2);
+      //println("Potenciometre: "+rotatorValue);
     }
     if ( dataAvailable (CHANNEL_3) ) {      
-      temperatureValue = getData(CHANNEL_3);
+      if (firstTime) {
+        startTemperatureValue = getData(CHANNEL_3);
+        firstTime = false;
+      } else temperatureValue = getData(CHANNEL_3);
+
+      println("Temperatura Inicial: "+startTemperatureValue);
+      println("Temperatura: "+temperatureValue);
     }
+  }
+
+  public float GetSpeedOnTempChange() {
+    return (temperatureValue - startTemperatureValue) * 0.25;
   }
 
   public void ShutDown() {
@@ -49,13 +62,14 @@ public class InputManager {
   }
 
   public float GetTemperatureValue() {
-    return map(temperatureValue, 0, 1023, 1, 10);
+    return GetSpeedOnTempChange();
+    //return map(temperatureValue, startTemperatureValue - 5, startTemperatureValue + 5, 1, 4);
   }
   public float GetRotatorValue() {
-    return map(rotatorValue, 0, 1023, height/10, height - height/10);
+    return map(rotatorValue, 0, 1023, height - height/10, height/10);
   }
   public float GetLightValue() {
-    return map(lightValue, 0, 1023, height/10, height - height/10);
+    return map(lightValue, 50, 250, height - height/10, height/10);
   }
 }
 
@@ -125,11 +139,11 @@ class Ball {
   float radius;
   vector position;
 
-  float speedMultiplier, speed;
+  float baseSpeed, speed;
   vector direction;
 
-  public Ball(float rad, vector pos, float speedMult) {
-    speedMultiplier = speedMult;
+  public Ball(float rad, vector pos, float bSpeed) {
+    baseSpeed = bSpeed;
     position = pos;
     radius = rad;
     speed = 5;
@@ -156,11 +170,12 @@ class Ball {
   }
 
   public void SetSpeed(float s) {
-    speed = s;
+    speed = baseSpeed + (baseSpeed*s);
   }
 
   public void Update(InputManager im, Bar left, Bar right) {
-    SetSpeed(im.GetTemperatureValue() * speedMultiplier);
+    SetSpeed(im.GetTemperatureValue());
+    println("Ball Speed: "+speed);
 
     this.position.x = this.position.x + this.speed * this.direction.x;
     this.position.y += this.speed * this.direction.y;
@@ -225,7 +240,7 @@ void setup()
   gameState = GameState.GAMEPLAY;
   hud = new HUD();
   im = new InputManager();
-  ball = new Ball(20, new vector(width/2, height/2), 10);
+  ball = new Ball(20, new vector(width/2, height/2), 2);
   barLeft = new LeftBar(new vector(width/8, height/2), 10, 60);
   barRight = new RightBar(new vector(width - width/8, height/2), 10, 60);
 
@@ -265,7 +280,9 @@ void draw()
       }
       break;
     }
+  } else {
+    im.ShutDown();
   }
 
-  im.ShutDown();
+  //clear();
 }
