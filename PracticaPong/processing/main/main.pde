@@ -1,5 +1,11 @@
 import processing.serial.*;
 
+static int WIN_SCORE = 10;
+
+enum GameState {
+  GAMEPLAY, ENDGAME
+}
+
 class vector {
   public float x, y;
   public vector() {
@@ -45,13 +51,13 @@ public class InputManager {
   }
 
   public float GetTemperatureValue() {
-    return temperatureValue;
+    return map(temperatureValue, 0, 1023, 0, 1);
   }
   public float GetRotatorValue() {
-    return rotatorValue;
+    return map(rotatorValue, 0, 1023, 0, 1);
   }
   public float GetLightValue() {
-    return lightValue;
+    return map(lightValue, 0, 1023, 0, 1);
   }
 }
 
@@ -120,7 +126,7 @@ class RightBar extends Bar {
 class Ball {
   float radius;
   vector position;
-  
+
   float speedMultiplier, speed;
   vector direction;
 
@@ -165,9 +171,15 @@ class Ball {
       if (direction.x > 0) {
         Reset();
         left.score++;
+        if (left.score >= WIN_SCORE) {
+          gameState = GameState.ENDGAME;
+        }
       } else if (direction.x < 0) {
         Reset();
         right.score++;
+        if (right.score >= WIN_SCORE) {
+          gameState = GameState.ENDGAME;
+        }
       }
       //direction.x *= -1;
     }
@@ -192,7 +204,6 @@ class HUD {
   public void Update(Bar left, Bar right) {
     scoreLeft = left.score;
     scoreRight = right.score;
-    
   }
   public void Draw() {
     textSize(32);
@@ -201,6 +212,7 @@ class HUD {
   }
 }
 
+GameState gameState;
 InputManager im;
 Ball ball;
 Bar barLeft, barRight;
@@ -212,6 +224,7 @@ void setup()
   noStroke();
   frameRate(30);
 
+  gameState = GameState.GAMEPLAY;
   hud = new HUD();
   im = new InputManager();
   ball = new Ball(20, new vector(width/2, height/2), 10);
@@ -224,23 +237,36 @@ void draw()
 {
   background(102);
 
-  if ( isPortConnected() ) {
-    //Update
-    im.Update();
-    barLeft.CheckBallCollision(ball);
-    barLeft.Update(im);
-    barRight.CheckBallCollision(ball);
-    barRight.Update(im);
-    ball.Update(im, barLeft, barRight);
-    
-    hud.Update(barLeft, barRight);
+  if ( isPortConnected()) {
 
-    //Draw
-    barLeft.Draw();
-    barRight.Draw();
-    ball.Draw();
-    
-    hud.Draw();
+    switch(gameState) {
+    case GAMEPLAY:
+      {//Update
+        im.Update();
+        barLeft.CheckBallCollision(ball);
+        barLeft.Update(im);
+        barRight.CheckBallCollision(ball);
+        barRight.Update(im);
+        ball.Update(im, barLeft, barRight);
+
+        hud.Update(barLeft, barRight);
+
+        //Draw
+        barLeft.Draw();
+        barRight.Draw();
+        ball.Draw();
+
+        hud.Draw();
+      }
+      break;
+    case ENDGAME:
+      {
+        if (barLeft.score >= WIN_SCORE) {
+          text("LEFT PLAYER WINS!", width/4, height/2);
+        } else text("RIGHT PLAYER WINS!", width/4, height/2);
+      }
+      break;
+    }
   }
 
   im.ShutDown();
