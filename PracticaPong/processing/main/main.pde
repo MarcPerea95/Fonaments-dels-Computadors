@@ -18,12 +18,36 @@ class vector {
   }
 }
 
+class Timer
+{
+  private long currentTime;
+  public Timer() {
+    currentTime = millis();
+  }
+  boolean Ready(int t)
+  {
+    if (millis() - currentTime >= t)
+    {
+      currentTime = millis();
+      return true;
+    } else {
+      return false;
+    }
+  }
+  float Remaining(int t)
+  {
+    return t - (millis() - currentTime);
+  }
+}
+
 public class InputManager {
   boolean firstTime;
   int lightValue, rotatorValue, temperatureValue;
   int startTemperatureValue;
-
+  Timer timer;
+  
   InputManager() {
+    timer = new Timer();
   }
 
   public void Setup() {
@@ -48,9 +72,11 @@ public class InputManager {
         firstTime = false;
       } else temperatureValue = getData(CHANNEL_3);
 
-      println("Temperatura Inicial: "+startTemperatureValue);
-      println("Temperatura: "+temperatureValue);
+      //println("Temperatura Inicial: "+startTemperatureValue);
+      //println("Temperatura: "+temperatureValue);
     }
+    
+    if(timer.Ready(500))println("Temperatura: "+temperatureValue);
   }
 
   public float GetSpeedOnTempChange() {
@@ -175,7 +201,7 @@ class Ball {
 
   public void Update(InputManager im, Bar left, Bar right) {
     SetSpeed(im.GetTemperatureValue());
-    println("Ball Speed: "+speed);
+    //println("Ball Speed: "+speed);
 
     this.position.x = this.position.x + this.speed * this.direction.x;
     this.position.y += this.speed * this.direction.y;
@@ -240,7 +266,7 @@ void setup()
   gameState = GameState.GAMEPLAY;
   hud = new HUD();
   im = new InputManager();
-  ball = new Ball(20, new vector(width/2, height/2), 2);
+  ball = new Ball(20, new vector(width/2, height/2), 4);
   barLeft = new LeftBar(new vector(width/8, height/2), 10, 60);
   barRight = new RightBar(new vector(width - width/8, height/2), 10, 60);
 
