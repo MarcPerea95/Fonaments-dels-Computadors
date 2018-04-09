@@ -65,6 +65,7 @@ abstract class Object {
 
 abstract class Bar extends Object {
   float w, h;
+  int score;
 
   public Bar() {
   }
@@ -116,9 +117,10 @@ class RightBar extends Bar {
   }
 }
 
-class Ball extends Object {
+class Ball {
   float radius;
-
+  vector position;
+  
   float speedMultiplier, speed;
   vector direction;
 
@@ -153,7 +155,7 @@ class Ball extends Object {
     speed = s;
   }
 
-  public void Update(InputManager im) {
+  public void Update(InputManager im, Bar left, Bar right) {
     SetSpeed(im.GetTemperatureValue() * speedMultiplier);
 
     this.position.x = this.position.x + this.speed * this.direction.x;
@@ -162,8 +164,10 @@ class Ball extends Object {
     if (position.x > width-radius || position.x < radius) {
       if (direction.x > 0) {
         Reset();
+        left.score++;
       } else if (direction.x < 0) {
         Reset();
+        right.score++;
       }
       //direction.x *= -1;
     }
@@ -178,9 +182,29 @@ class Ball extends Object {
     ellipse(position.x, position.y, radius, radius);
   }
 }
+
+class HUD {
+  private int scoreLeft, scoreRight;
+  HUD() {
+    scoreLeft = 0;
+    scoreRight = 0;
+  }
+  public void Update(Bar left, Bar right) {
+    scoreLeft = left.score;
+    scoreRight = right.score;
+    
+  }
+  public void Draw() {
+    textSize(32);
+    text(scoreLeft, width/4, height/8);
+    text(scoreRight, width - width/4, height/8);
+  }
+}
+
 InputManager im;
 Ball ball;
 Bar barLeft, barRight;
+HUD hud;
 
 void setup() 
 {
@@ -188,6 +212,7 @@ void setup()
   noStroke();
   frameRate(30);
 
+  hud = new HUD();
   im = new InputManager();
   ball = new Ball(20, new vector(width/2, height/2), 10);
   barLeft = new LeftBar(new vector(width/8, height/2), 10, 60);
@@ -206,12 +231,16 @@ void draw()
     barLeft.Update(im);
     barRight.CheckBallCollision(ball);
     barRight.Update(im);
-    ball.Update(im);
+    ball.Update(im, barLeft, barRight);
+    
+    hud.Update(barLeft, barRight);
 
     //Draw
     barLeft.Draw();
     barRight.Draw();
     ball.Draw();
+    
+    hud.Draw();
   }
 
   im.ShutDown();
