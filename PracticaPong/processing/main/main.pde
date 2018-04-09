@@ -20,7 +20,7 @@ class vector {
 
 public class InputManager {
 
-  float lightValue, rotatorValue, temperatureValue;
+  int lightValue, rotatorValue, temperatureValue;
 
   InputManager() {
   }
@@ -33,15 +33,13 @@ public class InputManager {
   {
 
     if ( dataAvailable (CHANNEL_1) ) {      
-      println ("Llum: "+getData(CHANNEL_1)+" ");
       lightValue = getData(CHANNEL_1);
+      println (lightValue);
     }
     if ( dataAvailable (CHANNEL_2) ) {      
-      println ("Potenciometre: "+getData(CHANNEL_2)+" ");
       rotatorValue = getData(CHANNEL_2);
     }
     if ( dataAvailable (CHANNEL_3) ) {      
-      println ("Temperatura: "+getData(CHANNEL_3)+" ");
       temperatureValue = getData(CHANNEL_3);
     }
   }
@@ -51,13 +49,13 @@ public class InputManager {
   }
 
   public float GetTemperatureValue() {
-    return map(temperatureValue, 0, 1023, 0, 1);
+    return map(temperatureValue, 0, 1023, 1, 10);
   }
   public float GetRotatorValue() {
-    return map(rotatorValue, 0, 1023, 0, 1);
+    return map(rotatorValue, 0, 1023, height/10, height - height/10);
   }
   public float GetLightValue() {
-    return map(lightValue, 0, 1023, 0, 1);
+    return map(lightValue, 0, 1023, height/10, height - height/10);
   }
 }
 
@@ -82,7 +80,7 @@ abstract class Bar extends Object {
   }
 
   void UpdateVerticalPosition(float value) {
-    position.y = map(value, 0, 1, height - h, h);
+    position.y = value;
   }
 
   void CheckBallCollision(Ball ball) {
