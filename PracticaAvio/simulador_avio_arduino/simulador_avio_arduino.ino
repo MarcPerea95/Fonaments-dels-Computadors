@@ -76,7 +76,9 @@ void loop() {
   //MOTOR
   valorVelocitat = velocitatBase + (incrementVelocitat * multiplicadorVelocitat);
   analogWrite(MOTOR_PIN, valorVelocitat);
+  Serial.print("MULTIPLICADOR ACTUAL: ");
   Serial.print(multiplicadorVelocitat);
+  Serial.println();
 
   //COMUNICACIÓ
   if ( portIsConnected() ) {
@@ -86,7 +88,6 @@ void loop() {
       multiplicadorVelocitat = getData(CHANNEL_3);
     }
   }
-
   commManager();
 }
 
