@@ -6,11 +6,13 @@
 #define SENSOR_PIN 2
 #define MOTOR_PIN 10
 
-long temps; //temps que triga el eco en rebotar
-long distancia; //distancia recorreguda en cm
-
-int valorVelocitat;
-
+int temps; //temps que triga el eco en rebotar
+int distancia; //distancia recorreguda en cm
+int inclinacioPerillosa; //true = 1; false = 0
+int velocitatBase;  //velocitat de gir inicial
+int incrementVelocitat; //increment fixe de velocitat
+int multiplicadorVelocitat; //parametre rebut introduit per Processing
+int valorVelocitat; //velocitat final amb el increment calculat
 
 void setup() {
 
@@ -18,7 +20,6 @@ void setup() {
   //ALTIMETRE
   pinMode(TRIGGER_PIN, OUTPUT);
   pinMode(ECHO_PIN, INPUT);
-
 
   //SENSOR INCLINACIO
   pinMode(SENSOR_PIN, INPUT);
@@ -29,63 +30,63 @@ void setup() {
 
   //MOTOR
   pinMode(MOTOR_PIN, OUTPUT);
-  //valorVelocitat = 0;
+  velocitatBase = 0;
+  incrementVelocitat = 10;
 
   commSetup();
 }
 
 void loop() {
-  
-  //COMUNICACIÓ
-  if ( portIsConnected() ) {
-    sendData (CHANNEL_1, distancia);
-    sendData (CHANNEL_2, digitalRead(SENSOR_PIN));
-    if (dataAvailable(CHANNEL_3) ) {
-      valorVelocitat = getData(CHANNEL_3);
-    }
-  }
 
   //ALTIMETRE
   digitalWrite(TRIGGER_PIN, LOW);
   delayMicroseconds(2);
 
-
+  //Enviem un pols de 10 microsegons
   digitalWrite(TRIGGER_PIN, HIGH);
-  delayMicroseconds(10); //Enviem un pols de 10 microsegons
+  delayMicroseconds(10);
   digitalWrite(TRIGGER_PIN, LOW);
+  //obtenim el resultat del pols i calculem la distancia
+  temps = pulseIn(ECHO_PIN, HIGH);
+  distancia = (temps / 59); //escalem el temps a una distancia en m
 
-  temps = pulseIn(ECHO_PIN, HIGH); //obtenim el ancho de pulso
-  distancia = (temps / 59) * 10000; //escalem el temps a una distancia en cm
-
+  //imprimim els resultats
   Serial.print("Distancia: ");
   Serial.print(distancia);  //imprimim la distancia
   Serial.print("metres");
   Serial.println();
   delay(100); //fem una pausa de 100ms
 
-
   //SENSOR INCLINACIO + BUZZER
-
   if (digitalRead(SENSOR_PIN))   {
     //MASSA INCLINACIÓ
     Serial.print("INCLINACIÓ MÀXIMA: ALERTA");
     Serial.println();
+    inclinacioPerillosa = 1;
     digitalWrite(BUZZER_PIN, HIGH);
     delay(100);
-
   } else {
     //TOT OK
     Serial.print("INCLINACIÓ OK");
     Serial.println();
+    inclinacioPerillosa = 0;
     digitalWrite(BUZZER_PIN, LOW);
   }
 
   //MOTOR
-  for (int i = 0; i < 255; i++)
-  {
-    analogWrite(MOTOR_PIN, i);
+  valorVelocitat = velocitatBase + (incrementVelocitat * multiplicadorVelocitat);
+  analogWrite(MOTOR_PIN, valorVelocitat);
+  Serial.print(multiplicadorVelocitat);
+
+  //COMUNICACIÓ
+  if ( portIsConnected() ) {
+    sendData (CHANNEL_1, distancia);
+    sendData (CHANNEL_2, inclinacioPerillosa);
+    if (dataAvailable(CHANNEL_3) ) {
+      multiplicadorVelocitat = getData(CHANNEL_3);
+    }
   }
-  
+
   commManager();
 }
 
