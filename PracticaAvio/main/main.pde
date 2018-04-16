@@ -6,17 +6,18 @@ void setup() {
   size(512, 512);
   im = new InputManager();
   hud = new HUD();
-  //im.Setup();
+  im.Setup();
 }
 void draw() {
-  
-  hud.Update(im);
-  
-  
-  hud.Draw();
-  /*
+
+
+
   if (isPortConnected()) {
-    //LOOP
+    hud.Update(im);
+
+
+    hud.Draw();
+  } else {
+    im.ShutDown();
   }
-  */
 }
