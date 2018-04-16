@@ -34,14 +34,14 @@ class HUD {
       print(engineSpeedModifier+"\n");
     }
     
-    led.SetColor(im.GetCriticalSignal() ? green : red);
+    led.SetColor(im.GetCriticalSignal() ? red : green);
     
     altitude = im.GetAltitude();
   }
   void Draw() {
     textSize(32);
     textAlign(CENTER);
-    text("Altutude: "+altitude, width/2, height/8);
+    text("Altitude: "+altitude, width/2, height/8);
     led.Draw();
     buttonUp.Draw();
     buttonDown.Draw();

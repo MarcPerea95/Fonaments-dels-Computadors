@@ -10,14 +10,14 @@ void setup() {
 }
 void draw() {
 
-
+clear();
 
   if (isPortConnected()) {
     hud.Update(im);
-
+    im.Update();
 
     hud.Draw();
-  } else {
-    im.ShutDown();
-  }
+  } 
+  im.ShutDown();
+  
 }

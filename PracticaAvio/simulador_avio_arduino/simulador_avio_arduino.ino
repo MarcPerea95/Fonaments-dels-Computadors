@@ -16,7 +16,7 @@ int valorVelocitat; //velocitat final amb el increment calculat
 
 void setup() {
 
-  Serial.begin(9600);
+  //Serial.begin(9600);
   //ALTIMETRE
   pinMode(TRIGGER_PIN, OUTPUT);
   pinMode(ECHO_PIN, INPUT);
@@ -51,34 +51,34 @@ void loop() {
   distancia = (temps / 59); //escalem el temps a una distancia en m
 
   //imprimim els resultats
-  Serial.print("Distancia: ");
-  Serial.print(distancia);  //imprimim la distancia
-  Serial.print("metres");
-  Serial.println();
+  //Serial.print("Distancia: ");
+  //Serial.print(distancia);  //imprimim la distancia
+  //Serial.print("metres");
+  //Serial.println();
   delay(100); //fem una pausa de 100ms
 
   //SENSOR INCLINACIO + BUZZER
   if (digitalRead(SENSOR_PIN))   {
     //MASSA INCLINACIÓ
-    Serial.print("INCLINACIÓ MÀXIMA: ALERTA");
-    Serial.println();
+    //Serial.print("INCLINACIÓ MÀXIMA: ALERTA");
+    //Serial.println();
     inclinacioPerillosa = 1;
     digitalWrite(BUZZER_PIN, HIGH);
-    delay(100);
+    //delay(100);
   } else {
     //TOT OK
-    Serial.print("INCLINACIÓ OK");
-    Serial.println();
+    //Serial.print("INCLINACIÓ OK");
+    //Serial.println();
     inclinacioPerillosa = 0;
     digitalWrite(BUZZER_PIN, LOW);
   }
 
   //MOTOR
   valorVelocitat = velocitatBase + (incrementVelocitat * multiplicadorVelocitat);
-  analogWrite(MOTOR_PIN, valorVelocitat);
-  Serial.print("MULTIPLICADOR ACTUAL: ");
-  Serial.print(multiplicadorVelocitat);
-  Serial.println();
+  analogWrite(MOTOR_PIN, map(valorVelocitat, 0, 100, 0, 255));
+  //Serial.print("MULTIPLICADOR ACTUAL: ");
+  //Serial.print(multiplicadorVelocitat);
+  //Serial.println();
 
   //COMUNICACIÓ
   if ( portIsConnected() ) {
@@ -86,9 +86,11 @@ void loop() {
     sendData (CHANNEL_2, inclinacioPerillosa);
     if (dataAvailable(CHANNEL_3) ) {
       multiplicadorVelocitat = getData(CHANNEL_3);
+      //digitalWrite(BUZZER_PIN, HIGH);
     }
   }
   commManager();
+  
 }
 
 

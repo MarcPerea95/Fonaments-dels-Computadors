@@ -2,11 +2,10 @@ public class InputManager {
   int altitude; //Chanel 1 RECEIVE
   boolean criticalSignal; //Chanel 2 RECEIVE
 
-  int startTemperatureValue;
-  //Timer timer;
 
   InputManager() {
     criticalSignal = false;
+    altitude = 0;
   }
 
   public void Setup() {
