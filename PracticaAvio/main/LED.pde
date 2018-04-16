@@ -19,6 +19,7 @@ class LED extends Object {
   }
 
   void Update() {
+    
   }
   void Draw() {
     noStroke();
